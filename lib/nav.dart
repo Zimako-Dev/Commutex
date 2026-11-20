@@ -30,15 +30,10 @@ class AppRouter {
         name: 'auth',
         pageBuilder: (context, state) => CustomTransitionPage(
           child: const AuthPage(),
+          transitionDuration: const Duration(milliseconds: 500),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(1, 0),
-                end: Offset.zero,
-              ).animate(CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-              )),
+            return FadeTransition(
+              opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
               child: child,
             );
           },
@@ -54,7 +49,9 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.calculator,
         name: 'calculator',
-        builder: (context, state) => const CalculatorPage(),
+        builder: (context, state) => CalculatorPage(
+          prefill: state.extra is FarePrefill ? state.extra as FarePrefill : null,
+        ),
       ),
       GoRoute(
         path: AppRoutes.tripPlanner,
@@ -65,8 +62,10 @@ class AppRouter {
         path: AppRoutes.results,
         name: 'results',
         builder: (context, state) {
-          final result = state.extra as TripResult;
-          return ResultPage(result: result);
+          final extra = state.extra;
+          // The estimator sends a full quote (with riders and tip); the trip planner sends a trip.
+          final quote = extra is FareQuote ? extra : FareQuote(trip: extra as TripResult);
+          return ResultPage(quote: quote);
         },
       ),
       GoRoute(

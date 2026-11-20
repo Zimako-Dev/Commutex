@@ -31,7 +31,7 @@ class ClaudeService {
   
   List<ChatMessage> get conversationHistory => List.unmodifiable(_conversationHistory);
 
-  static const String _systemPrompt = '''You are TaxiMate, a friendly and knowledgeable AI companion for South African taxi commuters. You help with:
+  static const String _systemPrompt = '''You are Kaya, a friendly and knowledgeable AI co-pilot for South African taxi commuters. You help with:
 
 1. **Fare Calculations**: Help users estimate taxi fares. Base fare is R15, plus R12 per kilometer. Peak hours (6-9 AM, 4-7 PM) add 30% surge.
 
@@ -51,20 +51,45 @@ When calculating fares:
 - Peak hour surge: +30%
 - Typical distances: JHB CBD to Soweto ~15km, Sandton to Alex ~5km, JHB to Pretoria ~55km''';
 
+  /// Whether an AI endpoint and key were provided at build time.
+  bool get isConfigured => _apiKey.isNotEmpty && _endpoint.isNotEmpty;
+
+  /// True when the most recent [sendMessage] call did not get a real answer.
+  bool lastFailed = false;
+
   void clearHistory() {
     _conversationHistory.clear();
   }
 
-  Future<String> sendMessage(String userMessage) async {
-    if (_apiKey.isEmpty || _endpoint.isEmpty) {
-      return "AI service is not configured. Please contact support.";
+  /// Removes the latest user message and the reply to it, so it can be asked again.
+  void undoLastExchange() {
+    if (_conversationHistory.isNotEmpty && _conversationHistory.last.role == 'assistant') {
+      _conversationHistory.removeLast();
+    }
+    if (_conversationHistory.isNotEmpty && _conversationHistory.last.role == 'user') {
+      _conversationHistory.removeLast();
+    }
+  }
+
+  /// Sends [userMessage]. [context] is extra, per-request information about the
+  /// rider (time of day, saved routes) appended to the system prompt.
+  Future<String> sendMessage(String userMessage, {String? context}) async {
+    if (!isConfigured) {
+      lastFailed = true;
+      return "I'm not connected to an AI service yet, so I can't answer right now. "
+          'The app needs an AI key added when it is built.';
     }
 
     _conversationHistory.add(ChatMessage(role: 'user', content: userMessage));
 
     try {
       final messages = [
-        {'role': 'system', 'content': _systemPrompt},
+        {
+          'role': 'system',
+          'content': context == null || context.isEmpty
+              ? _systemPrompt
+              : '$_systemPrompt\n\nLive context about this rider (use it when relevant):\n$context',
+        },
         ..._conversationHistory.map((m) => m.toApiFormat()),
       ];
 
@@ -91,16 +116,19 @@ When calculating fares:
           content: assistantMessage,
         ));
         
+        lastFailed = false;
         return assistantMessage;
       } else {
         debugPrint('Claude API Error: ${response.statusCode} - ${response.body}');
         _conversationHistory.removeLast();
-        return "Sorry, I couldn\'t process that request. Please try again.";
+        lastFailed = true;
+        return "Sorry, I couldn't process that request. Please try again.";
       }
     } catch (e) {
       debugPrint('Claude Service Error: $e');
       _conversationHistory.removeLast();
-      return "Connection error. Please check your internet and try again.";
+      lastFailed = true;
+      return 'Connection error. Please check your internet and try again.';
     }
   }
 

@@ -23,9 +23,11 @@ Commuting by minibus taxi in South Africa often means guessing what a trip will 
 - **Peak-hour awareness** – the app detects rush hour automatically and applies a surge so you see a realistic price.
 - **Fare splitting & tips** – split the fare across passengers and add a driver tip.
 - **Saved routes** – keep a personal travel library (Home → Work, Visit Gogo, …) with categories, favourites, usage counts and spending totals. Stored on the device, so it works offline.
-- **TaxiMate AI** – a built-in chat assistant that answers questions about fares, routes, safety tips and transport budgeting.
+- **Kaya, your AI co-pilot** – a built-in chat assistant for fares, routes, safety and budgeting. It knows whether it's peak hour right now and (if you allow it) your saved routes, so its answers are personal. Replies are nicely formatted, with copy, regenerate and follow-up suggestions.
 - **Share trip results** via WhatsApp.
-- **Safety first** – a one-tap SOS sheet with quick dial for SAPS (10111) and ambulance (10177), plus live-location sharing with trusted contacts.
+- **Safety first** – a one-tap SOS sheet that opens your dialer for SAPS (10111), ambulance (10177) or 112 from any cellphone.
+- **Rush-hour radar** – the home screen shows whether peak-hour surge pricing is on right now and counts down to the next change.
+- **Spending at a glance** – a weekly budget ring and 7-day spend chart on the home screen.
 - **Light, dark and system themes**, picked during onboarding and changeable in Settings.
 
 ### How fares are calculated
@@ -51,7 +53,7 @@ Commuting by minibus taxi in South Africa often means guessing what a trip will 
 |:---:|:---:|:---:|
 | <img src="screenshots/calculator_light.png" width="240"/> | <img src="screenshots/trip_planner_light.png" width="240"/> | <img src="screenshots/saved_routes_light.png" width="240"/> |
 
-| TaxiMate AI | Settings |
+| Kaya AI | Settings |
 |:---:|:---:|
 | <img src="screenshots/ai_chat_light.png" width="240"/> | <img src="screenshots/settings_light.png" width="240"/> |
 
@@ -116,7 +118,7 @@ Or run it in the browser:
 flutter run -d chrome
 ```
 
-### 4. (Optional) Enable the TaxiMate AI chat
+### 4. (Optional) Enable Kaya, the AI chat
 
 The AI assistant talks to an OpenAI-compatible chat completions endpoint. Pass your endpoint and key at build time — without them the chat replies that the AI service isn't configured, and everything else still works.
 
@@ -151,7 +153,7 @@ lib/
 ├── services/
 │   ├── fare_service.dart          # Fare & distance calculation
 │   ├── saved_routes_service.dart  # Saved routes (shared_preferences)
-│   ├── claude_service.dart        # TaxiMate AI chat client
+│   ├── claude_service.dart        # Kaya AI chat client
 │   └── theme_provider.dart        # Theme mode state
 ├── pages/
 │   ├── onboarding_page.dart
